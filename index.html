@@ -673,7 +673,7 @@
     };
 
     // ===== SUPERVISOR CHAT =====
-    function SupervisorChat() {
+    function SupervisorChat({ autoStart }) {
       const [messages, setMessages] = useState([]);
       const [chips, setChips] = useState([]);
       const [typing, setTyping] = useState(false);
@@ -698,11 +698,11 @@
       }, [messages, typing]);
 
       useEffect(() => {
-        if (startedRef.current) return;
+        if (!autoStart || startedRef.current) return;
         startedRef.current = true;
         playScene('start', null);
         return () => clearAllTimeouts();
-      }, []);
+      }, [autoStart]);
 
       const playScene = (sceneId, userMsg) => {
         setChips([]);
@@ -1113,9 +1113,114 @@
       );
     }
 
+    // ===== WELCOME OVERLAY =====
+    function WelcomeOverlay({ onStart }) {
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{background:'rgba(0,0,0,0.6)', backdropFilter:'blur(4px)'}}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 overflow-hidden animate-fadeIn">
+            {/* Header */}
+            <div className="px-8 pt-8 pb-4">
+              <div className="flex items-center gap-3 mb-1">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{background:B.teal}}>
+                  <Icons.shield size={20} cls="text-white"/>
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold" style={{color:B.teal}}>Supervisor Attendance Control Surface</h1>
+                  <p className="text-sm text-gray-500">Interactive Prototype — TeamSense</p>
+                </div>
+              </div>
+            </div>
+
+            {/* What this is */}
+            <div className="px-8 pb-4">
+              <p className="text-sm text-gray-700 leading-relaxed">
+                This prototype demonstrates how an <strong>AI agent handles the daily attendance workflow</strong> through a conversational interface — replacing the traditional dashboard with a smart messaging experience that uses <strong>RCS for decisions</strong> and <strong>SMS for status updates</strong>.
+              </p>
+              <a href="https://www.notion.so/3066d2dbf270813ab054dedba69ab290" target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 mt-2 text-sm font-medium hover:underline" style={{color:B.tealLight}}>
+                <Icons.file size={14}/>
+                Read the full PRD in Notion →
+              </a>
+            </div>
+
+            {/* Three views */}
+            <div className="px-8 pb-4">
+              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Three Persona Views</div>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="bg-gray-50 rounded-xl p-3">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <Icons.msg size={14} cls="text-teal-600"/>
+                    <span className="text-sm font-semibold" style={{color:B.teal}}>Supervisor (Sal)</span>
+                  </div>
+                  <p className="text-xs text-gray-600 leading-relaxed">The primary experience. A phone-style chat where Sal confirms attendance by tapping — not typing. The agent handles 87% of employees automatically and only escalates what needs human judgment.</p>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-3">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <Icons.barChart size={14} cls="text-teal-600"/>
+                    <span className="text-sm font-semibold" style={{color:B.teal}}>HR Dashboard</span>
+                  </div>
+                  <p className="text-xs text-gray-600 leading-relaxed">The structured data view. Shows what the agent did automatically vs. what the supervisor decided, shift overview, and confirmation quality metrics. This is "pull" mode — HR goes here to audit, not to operate.</p>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-3">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <Icons.user size={14} cls="text-teal-600"/>
+                    <span className="text-sm font-semibold" style={{color:B.teal}}>Employee (James)</span>
+                  </div>
+                  <p className="text-xs text-gray-600 leading-relaxed">Self-service via SMS. Employees text to check their points balance, understand thresholds, and get guidance. No app, no portal — just text. This is the "Data Birthright" in action.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* How to interact */}
+            <div className="px-8 pb-4">
+              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">How to Interact</div>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
+                {[
+                  ['Tap the chips', 'below messages to make decisions — the conversation branches based on your choices'],
+                  ['Swipe the carousels', 'to browse employee cards and backfill candidates'],
+                  ['Watch the context panel', '(right side) to see why each channel was chosen and what the agent did automatically'],
+                  ['Try different paths', '— tap "Restart Demo" at the end to explore alternate branches (NCNS vs. Excused, etc.)']
+                ].map(([bold, rest], i) => (
+                  <div key={i} className="flex items-start gap-2 text-xs text-gray-700">
+                    <span className="text-teal-500 mt-0.5 flex-shrink-0">●</span>
+                    <span><strong>{bold}</strong> {rest}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Channel legend */}
+            <div className="px-8 pb-6">
+              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Channel Key</div>
+              <div className="flex gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-teal-100 text-teal-700">RCS</span>
+                  <span className="text-xs text-gray-600">Rich cards, carousels, tap-to-act — used for <strong>decisions</strong></span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-gray-100 text-gray-500">SMS</span>
+                  <span className="text-xs text-gray-600">Plain text — used for <strong>status updates and confirmations</strong></span>
+                </div>
+              </div>
+            </div>
+
+            {/* CTA */}
+            <div className="px-8 pb-8">
+              <button onClick={onStart}
+                className="w-full py-3 rounded-xl text-white font-bold text-sm transition-all hover:opacity-90"
+                style={{background:B.teal}}>
+                Start the Demo
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     // ===== APP SHELL =====
     function App() {
       const [tab, setTab] = useState('supervisor');
+      const [showWelcome, setShowWelcome] = useState(true);
 
       const tabs = [
         { id:'supervisor', label:'Supervisor (Sal)', icon: Icons.msg },
@@ -1138,8 +1243,8 @@
                 </div>
               </div>
 
-              {/* Tabs */}
-              <div className="flex">
+              {/* Tabs + Help */}
+              <div className="flex items-center">
                 {tabs.map(t => (
                   <button key={t.id} onClick={() => setTab(t.id)}
                     className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-all ${
@@ -1151,14 +1256,22 @@
                     {t.label}
                   </button>
                 ))}
+                <button onClick={() => setShowWelcome(true)}
+                  className="ml-3 w-7 h-7 rounded-full border-2 border-gray-300 flex items-center justify-center text-xs font-bold text-gray-400 hover:border-teal-500 hover:text-teal-600 transition-all"
+                  title="Show instructions">
+                  ?
+                </button>
               </div>
             </div>
           </div>
 
           {/* Content */}
-          {tab === 'supervisor' && <SupervisorChat key="sup"/>}
+          {tab === 'supervisor' && <SupervisorChat key="sup" autoStart={!showWelcome}/>}
           {tab === 'hr' && <HRDashboard/>}
           {tab === 'employee' && <EmployeeChat key="emp"/>}
+
+          {/* Welcome overlay */}
+          {showWelcome && <WelcomeOverlay onStart={() => setShowWelcome(false)}/>}
         </div>
       );
     }
